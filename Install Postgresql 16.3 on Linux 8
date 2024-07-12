@@ -1,0 +1,210 @@
+Download source rpm from : 
+https://download.postgresql.org/pub/repos/yum/16/redhat/rhel-8-x86_64/
+
+postgresql16-server-16.3-3PGDG.rhel8.x86_64.rpm
+postgresql16-libs-16.3-3PGDG.rhel8.x86_64.rpm
+postgresql16-16.3-3PGDG.rhel8.x86_64.rpm
+postgresql16-contrib-16.3-3PGDG.rhel8.x86_64.rpm
+lz4 
+libxslt
+
+[root@adgholad1-91856 oracle]# rpm -ih postgresql16-libs-16.3-3PGDG.rhel8.x86_64.rpm
+warning: postgresql16-libs-16.3-3PGDG.rhel8.x86_64.rpm: Header V4 RSA/SHA256 Signature, key ID 08b40d20: NOKEY
+################################# [100%]
+################################# [100%]
+Updating / installing...
+################################# [100%]
+
+[root@adgholad1-91856 oracle]# yum install lz4
+Last metadata expiration check: 2:35:34 ago on Fri 12 Jul 2024 12:01:22 AM UTC.
+Dependencies resolved.
+=============================================================================================================================================================================================================================================================================================================================
+ Package                                                               Architecture                                                             Version                                                                            Repository                                                                           Size
+=============================================================================================================================================================================================================================================================================================================================
+Installing:
+ lz4                                                                   x86_64                                                                   1.8.3-3.el8_4                                                                      ol8_baseos_latest                                                                   103 k
+
+Transaction Summary
+=============================================================================================================================================================================================================================================================================================================================
+Install  1 Package
+
+Total download size: 103 k
+Installed size: 200 k
+Is this ok [y/N]: y
+Downloading Packages:
+lz4-1.8.3-3.el8_4.x86_64.rpm                                                                                                                                                                                                                                                                 2.8 MB/s | 103 kB     00:00
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Total                                                                                                                                                                                                                                                                                        2.6 MB/s | 103 kB     00:00
+Running transaction check
+Transaction check succeeded.
+Running transaction test
+Transaction test succeeded.
+Running transaction
+  Preparing        :                                                                                                                                                                                                                                                                                                     1/1
+  Installing       : lz4-1.8.3-3.el8_4.x86_64                                                                                                                                                                                                                                                                            1/1
+  Running scriptlet: lz4-1.8.3-3.el8_4.x86_64                                                                                                                                                                                                                                                                            1/1
+  Verifying        : lz4-1.8.3-3.el8_4.x86_64                                                                                                                                                                                                                                                                            1/1
+
+Installed:
+  lz4-1.8.3-3.el8_4.x86_64
+
+Complete!
+
+[root@adgholad1-91856 oracle]# rpm -ih postgresql16-16.3-3PGDG.rhel8.x86_64.rpm
+warning: postgresql16-16.3-3PGDG.rhel8.x86_64.rpm: Header V4 RSA/SHA256 Signature, key ID 08b40d20: NOKEY
+################################# [100%]
+################################# [100%]
+Updating / installing...
+################################# [100%]
+[root@adgholad1-91856 oracle]# rpm -ih postgresql16-server-16.3-3PGDG.rhel8.x86_64.rpm
+warning: postgresql16-server-16.3-3PGDG.rhel8.x86_64.rpm: Header V4 RSA/SHA256 Signature, key ID 08b40d20: NOKEY
+warning: waiting for transaction lock on /var/lib/rpm/.rpm.lock
+################################# [100%]
+################################# [100%]
+Updating / installing...
+################################# [100%]
+
+[root@adgholad1-91856 oracle]# yum install libxslt
+Last metadata expiration check: 2:57:40 ago on Fri 12 Jul 2024 12:01:22 AM UTC.
+Dependencies resolved.
+=============================================================================================================================================================================================================================================================================================================================
+ Package                                                                  Architecture                                                            Version                                                                           Repository                                                                          Size
+=============================================================================================================================================================================================================================================================================================================================
+Installing:
+ libxslt                                                                  x86_64                                                                  1.1.32-6.0.1.el8                                                                  ol8_baseos_latest                                                                  250 k
+
+Transaction Summary
+=============================================================================================================================================================================================================================================================================================================================
+Install  1 Package
+
+Total download size: 250 k
+Installed size: 734 k
+Is this ok [y/N]: y
+Downloading Packages:
+libxslt-1.1.32-6.0.1.el8.x86_64.rpm                                                                                                                                                                                                                                                          7.5 MB/s | 250 kB     00:00
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Total                                                                                                                                                                                                                                                                                        6.8 MB/s | 250 kB     00:00
+Running transaction check
+Transaction check succeeded.
+Running transaction test
+Transaction test succeeded.
+Running transaction
+  Preparing        :                                                                                                                                                                                                                                                                                                     1/1
+  Installing       : libxslt-1.1.32-6.0.1.el8.x86_64                                                                                                                                                                                                                                                                     1/1
+  Running scriptlet: libxslt-1.1.32-6.0.1.el8.x86_64                                                                                                                                                                                                                                                                     1/1
+  Verifying        : libxslt-1.1.32-6.0.1.el8.x86_64                                                                                                                                                                                                                                                                     1/1
+
+Installed:
+  libxslt-1.1.32-6.0.1.el8.x86_64
+
+Complete!
+
+[root@adgholad1-91856 oracle]# rpm -ih postgresql16-contrib-16.3-3PGDG.rhel8.x86_64.rpm
+warning: postgresql16-contrib-16.3-3PGDG.rhel8.x86_64.rpm: Header V4 RSA/SHA256 Signature, key ID 08b40d20: NOKEY
+################################# [100%]
+################################# [100%]
+Updating / installing...
+################################# [100%]
+[root@adgholad1-91856 oracle]#
+
+
+
+Once installed, be sure to initialize the database as shown.
+
+/usr/pgsql-16/bin/postgresql-16-setup initdb
+To set the PostgreSQL service to auto-start every time upon booting, run the command:
+systemctl enable postgresql-16 
+By default, PostgreSQL does not start automatically. To start it, run the command:
+systemctl start postgresql-16
+To verify that the service is running, execute the command:
+
+[root@adgholad1-91856 oracle]# systemctl status postgresql-16
+● postgresql-16.service - PostgreSQL 16 database server
+   Loaded: loaded (/usr/lib/systemd/system/postgresql-16.service; enabled; vendor preset: disabled)
+   Active: active (running) since Fri 2024-07-12 02:42:40 UTC; 18min ago
+     Docs: https://www.postgresql.org/docs/16/static/
+  Process: 77603 ExecStartPre=/usr/pgsql-16/bin/postgresql-16-check-db-dir ${PGDATA} (code=exited, status=0/SUCCESS)
+ Main PID: 77610 (postgres)
+    Tasks: 7 (limit: 79998)
+   Memory: 7.3M
+   CGroup: /system.slice/postgresql-16.service
+           ├─77610 /usr/pgsql-16/bin/postgres -D /var/lib/pgsql/16/data/
+           ├─77611 postgres: logger
+           ├─77612 postgres: checkpointer
+           ├─77613 postgres: background writer
+           ├─77615 postgres: walwriter
+           ├─77616 postgres: autovacuum launcher
+           └─77617 postgres: logical replication launcher
+
+Jul 12 02:42:40 adgholad1-91856 systemd[1]: Starting PostgreSQL 16 database server...
+Jul 12 02:42:40 adgholad1-91856 postgres[77610]: 2024-07-12 02:42:40.620 UTC [77610] LOG:  redirecting log output to logging collector process
+Jul 12 02:42:40 adgholad1-91856 postgres[77610]: 2024-07-12 02:42:40.620 UTC [77610] HINT:  Future log output will appear in directory "log".
+Jul 12 02:42:40 adgholad1-91856 systemd[1]: Started PostgreSQL 16 database server.
+
+
+To restart the database server, run the command:
+systemctl restart postgresql-16
+
+You can also reload the database server without stopping the service.
+ systemctl reload postgresql-16
+
+
+To check the version of PostgreSQL on your server, run the following command:
+[root@adgholad1-91856 oracle]# su - postgres
+Last login: Fri Jul 12 02:43:07 UTC 2024 on pts/0
+[postgres@adgholad1-91856 ~]$
+[postgres@adgholad1-91856 ~]$ psql -V
+psql (PostgreSQL) 16.3
+
+
+How to Enable Authentication in PostgreSQL
+
+vim /var/lib/pgsql/16/data/pg_hba.conf
+local  all  all  md5
+
+systemctl reload postgresql-16
+
+To list all the existing databases on the server, run the query:
+
+[postgres@adgholad1-91856 ~]$ psql
+psql (16.3)
+Type "help" for help.
+
+postgres=# \l
+                                                       List of databases
+   Name    |  Owner   | Encoding | Locale Provider |   Collate   |    Ctype    | ICU Locale | ICU Rules |   Access privileges
+-----------+----------+----------+-----------------+-------------+-------------+------------+-----------+-----------------------
+ postgres  | postgres | UTF8     | libc            | en_US.UTF-8 | en_US.UTF-8 |            |           |
+ template0 | postgres | UTF8     | libc            | en_US.UTF-8 | en_US.UTF-8 |            |           | =c/postgres          +
+           |          |          |                 |             |             |            |           | postgres=CTc/postgres
+ template1 | postgres | UTF8     | libc            | en_US.UTF-8 | en_US.UTF-8 |            |           | =c/postgres          +
+           |          |          |                 |             |             |            |           | postgres=CTc/postgres
+(3 rows)
+
+postgres=#
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
