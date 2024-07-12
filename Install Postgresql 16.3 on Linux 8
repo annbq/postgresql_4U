@@ -186,7 +186,30 @@ postgres=#
 
 
 
+POST INSTALLATION 
 
+set some environtment parameters in bash_profile 
+
+
+
+[root@adgholad1-91856 oracle]# su - postgres
+Last login: Fri Jul 12 03:02:15 UTC 2024 on pts/0
+
+
+vi .bash_profile
+
+# User specific environment and startup programs
+export PATH=$PATH:/usr/pgsql-16/bin/
+export PGDATA=/var/lib/pgsql/16/data
+export PGUSER=postgres
+export PGDATABBASE=postgres
+export PGPORT=5432
+
+[postgres@adgholad1-91856 ~]$ . .bash_profile
+[postgres@adgholad1-91856 ~]$
+[postgres@adgholad1-91856 ~]$ pg_ctl status
+pg_ctl: server is running (PID: 77610)
+/usr/pgsql-16/bin/postgres "-D" "/var/lib/pgsql/16/data/"
 
 
 
