@@ -1,0 +1,239 @@
+User Tools -Command Line Interfaces
+
+Module Objectives
+ - Introduction to psql
+ - Connecting to Database
+ - psql Command Line Parameters
+ - psql Meta-Commands
+ - Conditional and Information Commands
+
+Introduction to psql 
+ psql is a command line interface (CLI) to Postgres
+ Can be used to execute SQL queries and psqlmeta commands
+
+[root@localhost ~]# su - postgres
+Last login: Mon Jul 13 12:39:58 EDT 2026 on pts/0
+[postgres@localhost ~]$ psql
+psql (16.9)
+
+postgres=# exit
+[postgres@localhost ~]$ psql -p 5432 -U postgres -d postgres
+psql (16.9)
+Type "help" for help.
+
+-d <Database Name>
+-h <Hostname>
+-p <Database Port>
+-U <Database Username>
+
+Environment variable: 
+PGDATABASE, PGHOST, PGPORT and PGUSER
+
+
+Conventions
+psql has its own set of commands, all of which start with a backslash (\).
+Some commands accept a pattern. This pattern is a modified regex. Key points:
+* and ? are wildcards
+Double-quotes are used to specify an exact name, ignoring all special characters and preserving case
+
+
+1. Connect to a database using psql
+
+[postgres@localhost ~]$ psql -p 5432 -U postgres -d postgres
+psql (16.9)
+Type "help" for help.
+
+postgres-# \conninfo
+You are connected to database "postgres" as user "postgres" via socket in "/run/postgresql" at port "5432".
+
+
+2. List all databases.
+
+postgres=# \l
+                                                       List of databases
+   Name    |  Owner   | Encoding | Locale Provider |   Collate   |    Ctype    |
+ ICU Locale | ICU Rules |   Access privileges
+-----------+----------+----------+-----------------+-------------+-------------+
+------------+-----------+-----------------------
+ edbstore  | edbuser  | UTF8     | libc            | en_CA.UTF-8 | en_CA.UTF-8 |
+            |           |
+ oracle_ai | ai_dba   | UTF8     | libc            | en_CA.UTF-8 | en_CA.UTF-8 |
+            |           | =Tc/ai_dba           +
+           |          |          |                 |             |             |
+            |           | ai_dba=CTc/ai_dba
+ postgres  | postgres | UTF8     | libc            | en_CA.UTF-8 | en_CA.UTF-8 |
+            |           |
+ template0 | postgres | UTF8     | libc            | en_CA.UTF-8 | en_CA.UTF-8 |
+            |           | =c/postgres          +
+           |          |          |                 |             |             |
+            |           | postgres=CTc/postgres
+ template1 | postgres | UTF8     | libc            | en_CA.UTF-8 | en_CA.UTF-8 |
+            |           | =c/postgres          +
+           |          |          |                 |             |             |
+            |           | postgres=CTc/postgres
+(5 rows)
+
+postgres=#
+
+
+3. Switch to the oracle_ai database.
+
+postgres=# \c oracle_ai
+You are now connected to database "oracle_ai" as user "postgres".
+oracle_ai=#
+
+4. Describe the oracle_docs table.
+
+oracle_ai=# \dt
+           List of relations
+ Schema |    Name     | Type  | Owner
+--------+-------------+-------+--------
+ public | oracle_docs | table | ai_dba
+(1 row)
+
+oracle_ai=# \d oracle_docs
+                                Table "public.oracle_docs"
+  Column   |    Type     | Collation | Nullable |                 Default
+-----------+-------------+-----------+----------+-----------------------------------------
+ id        | integer     |           | not null | nextval('oracle_docs_id_seq'::regclass)
+ title     | text        |           |          |
+ category  | text        |           |          |
+ content   | text        |           |          |
+ embedding | vector(384) |           |          |
+Indexes:
+    "oracle_docs_pkey" PRIMARY KEY, btree (id)
+    "idx_oracle_docs_embedding" hnsw (embedding vector_cosine_ops)
+
+
+5. Describe the oracle_docs table including description.
+
+oracle_ai=# \d+ oracle_docs
+                                                           Table "public.oracle_docs"
+  Column   |    Type     | Collation | Nullable |                 Default                 | Storage  | Compression | Stats target | Description
+-----------+-------------+-----------+----------+-----------------------------------------+----------+-------------+--------------+-------------
+ id        | integer     |           | not null | nextval('oracle_docs_id_seq'::regclass) | plain    |             |              |
+ title     | text        |           |          |                                         | extended |             |              |
+ category  | text        |           |          |                                         | extended |             |              |
+ content   | text        |           |          |                                         | extended |             |              |
+ embedding | vector(384) |           |          |                                         | external |             |              |
+Indexes:
+    "oracle_docs_pkey" PRIMARY KEY, btree (id)
+    "idx_oracle_docs_embedding" hnsw (embedding vector_cosine_ops)
+Access method: heap
+
+6. List all schemas
+oracle_ai=# \c edbstore
+You are now connected to database "edbstore" as user "postgres".
+edbstore=# \dn
+       List of schemas
+  Name   |       Owner
+---------+-------------------
+ edbuser | edbuser
+ public  | pg_database_owner
+(2 rows)
+
+7. List all tablespaces.
+
+edbstore=# \db
+       List of tablespaces
+    Name    |  Owner   | Location
+------------+----------+----------
+ pg_default | postgres |
+ pg_global  | postgres |
+(2 rows)
+
+
+8. Execute an SQL statement, to save the output to a file.
+
+edbstore=> \o /tmp/customers.txt
+edbstore=> select * from customers;
+edbstore=> \o
+
+9. create a script, and execute from psql.
+
+[postgres@localhost ~]$ touch emp.sql
+[postgres@localhost ~]$ echo "select * from emp;" > emp.sql
+[postgres@localhost ~]$
+[postgres@localhost ~]$ cat emp.sql
+select * from emp;
+
+
+[postgres@localhost ~]$ psql -h 10.0.0.177 -d edbstore -U edbuser -p 5432 -f emp.sql
+Password for user edbuser:
+
+ empno | ename  |    job    | mgr  |      hiredate       |   sal   |  comm   | d
+eptno
+-------+--------+-----------+------+---------------------+---------+---------+--
+------
+  7369 | SMITH  | CLERK     | 7902 | 1980-12-17 00:00:00 |  800.00 |         |
+   20
+  7499 | ALLEN  | SALESMAN  | 7698 | 1981-02-20 00:00:00 | 1600.00 |  300.00 |
+   30
+  7521 | WARD   | SALESMAN  | 7698 | 1981-02-22 00:00:00 | 1250.00 |  500.00 |
+
+
+edbstore=> \x
+Expanded display is on.
+edbstore=> select * from emp;
+-[ RECORD 1 ]-----------------
+empno    | 7369
+ename    | SMITH
+job      | CLERK
+mgr      | 7902
+hiredate | 1980-12-17 00:00:00
+sal      | 800.00
+comm     |
+deptno   | 20
+-[ RECORD 2 ]-----------------
+
+
+edbstore=> \x
+Expanded display is off.
+edbstore=>
+
+10. Lists tables, views, and sequences with their associated access privileges.
+
+edbstore=> \dp
+                                        Access privileges
+ Schema  |           Name           |   Type   | Access privileges | Column privileges | Policies
+---------+--------------------------+----------+-------------------+-------------------+----------
+ edbuser | categories               | table    |                   |                   |
+ edbuser | categories_category_seq  | sequence |                   |                   |
+ edbuser | cust_hist                | table    |                   |                   |
+ edbuser | customers                | table    |                   |                   |
+ edbuser | customers_customerid_seq | sequence |                   |                   |
+ edbuser | dept                     | table    |                   |                   |
+ edbuser | emp                      | table    |                   |                   |
+ edbuser | inventory                | table    |                   |                   |
+ edbuser | job_grd                  | table    |                   |                   |
+ edbuser | jobhist                  | table    |                   |                   |
+ edbuser | locations                | table    |                   |                   |
+ edbuser | next_empno               | sequence |                   |                   |
+ edbuser | orderlines               | table    |                   |                   |
+ edbuser | orders                   | table    |                   |                   |
+ edbuser | orders_orderid_seq       | sequence |                   |                   |
+ edbuser | products                 | table    |                   |                   |
+ edbuser | products_prod_id_seq     | sequence |                   |                   |
+ edbuser | reorder                  | table    |                   |                   |
+ edbuser | salesemp                 | view     |                   |                   |
+(19 rows)
+
+
+
+
+11. Use condition statements: 
+
+SELECT EXISTS(
+    SELECT 1
+    FROM pg_database
+    WHERE datname='oracle_ai'
+) AS db_exists
+\gset
+
+
+\if :db_exists
+    \echo 'Database oracle_ai already exists'
+\else
+    CREATE DATABASE oracle_ai;
+    \echo 'Database created'
+\endif
