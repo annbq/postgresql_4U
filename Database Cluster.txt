@@ -1,0 +1,397 @@
+Database Clusters
+
+Module Objectives
+	Database Clusters
+	Creating a Database Cluster
+	Starting and Stopping the Server (pg_ctl)
+	Connecting to the Server Using psql
+	
+
+Database Clusters
+	A Database Cluster is a collection of databases managed by a single server instance
+Database Clusters are comprised of:
+	Data directory
+	Port
+Default databases are created named:
+	template0
+	template1
+	postgres
+
+
+Creating a Database Cluster
+	Choose the data directory location for new cluster
+	Initialize the database cluster storage area (data directory) using the initdb utility
+	initdb will create the data directory if it doesn’t exist
+	You must have permissions on the parent directory so that initdbcan create the data directory
+	The data directory can be created manually by superuser and the ownership can be given to postgres user
+	
+initdb Utility
+$ initdb[OPTION]... [DATADIR]
+Options:
+-D, --pgdatalocation for this database cluster
+-E, --encodingset default encoding for new databases
+-U, --username database superuser name
+-W, --pwpromptprompt for a password for the new superuser
+-X, --waldirlocation for the write-ahead log directory
+--wal-segsizesize of walsegments , in megabytes
+-k, --data-checksumsuse data page checksums
+-?, --helpshow this help, then exit
+If the data directory is not specified, the environment variable PGDATAis used
+
+Example -initdb
+[root@Base~]# mkdir/edbstore
+[root@Base~]# chown postgres:postgres/edbstore
+[root@Base~]# su – postgres
+[postgres@Base~]$ initdb -D /edbstore --wal-segsize 1024 -W
+
+In the above example the database system will be owned by user postgres
+The postgres user is the database superuser
+The default server config file will be created in /edbstorenamed postgresql.conf
+--wal-segsize 1024 MB specifies the write-ahead log file segment size
+-W is used to force initdb to prompt for the superuser password
+
+pg_ctl Utility
+pg_ctl is a command line utility provided by Postgres to initialize, start, stop and control a Postgres instance
+It provides options for redirecting start log, controlled startup and shutdown
+-D option or environmental variable PGDATA can be used to specify cluster data directory
+
+
+Starting a Database Cluster
+
+After initializing a database cluster, a unique port must be assigned
+Choose a unique port for postmaster in postgresql.conf
+Start the database cluster using pg_ctl utility
+Example:
+[postgres@Base~]$ vi /edbstore/postgresql.conf
+port = 5434
+[postgres@Base~]$ pg_ctl-D /edbstore/ -l /edbstore/startlogstart
+waiting for server to start.... done
+server started
+[postgres@Base~]$ pg_ctl -D /edbstore/ status
+pg_ctl: server is running (PID: 62239)
+
+Connecting To a Database Cluster
+The psqland pgAdmin can be used for connections
+[postgres@Base~]$ psql -p 5434 -d edb -U postgres
+Type "help" for help.
+edb=# show port;
+port
+------
+5434
+(1 row)
+edb=# show data_directory;
+data_directory
+----------------
+/edbstore
+(1 row)
+edb=# \q
+
+
+Reload a Database Cluster
+Some configuration parameter changes do not require a restart
+Changes can be reloaded using the pg_ctl utility
+Changes can also be reloaded using pg_reload_conf()
+Syntax:
+$ pg_ctl reload [options]
+-D location of the database cluster’s data directory
+-s only print errors, no informational messages
+
+
+Stopping a Database Cluster
+pg_ctl supports three modes of shutdown
+smart : quit after all clients have disconnected
+Fast  : quit directly, with proper shutdown (default)
+immediate : quit without complete shutdown; will lead to recovery
+Syntax:$ pg_ctl stop [-W] [-t SECS] [-D DATADIR] [-s] [-m SHUTDOWN-MODE]
+
+Example:
+[postgres@Base~]$ pg_ctl -D /edbstore/ stop
+waiting for server to shut down.... done
+server stopped
+[postgres@Base~]$ pg_ctl -D /edbstore/ status
+pg_ctl: no server running
+
+View Cluster Control Information
+
+pg_controldata can be used to view the control information for a database cluster
+
+It can be run with data directory as an option
+
+[postgres@Base~]$ pg_controldata/edbstore/
+……………………………………………………………………………………………….
+Database system identifier: 6724770293870218226
+Database cluster state: shut down
+Latest checkpoint location: 0/41A3AA40
+Latest checkpoint's REDO WAL file: 000000010000000000000001
+Latest checkpoint's TimeLineID: 1
+Backup start location: 0/0
+Backup end location: 0/0
+wal_levelsetting: replica
+Database block size: 8192
+WAL block size: 8192
+Data page checksum version: 0
+
+
+Lab Exercise -1
+1. A new website is to be developed for an online music store.
+Create a new cluster edbdata with ownership of postgres user
+Start your edbdata cluster
+Reload your cluster with pg_ctl utility and using pg_reload_conf() function
+Stop your edbdata cluster with fast mode
+
+[root@localhost ~]# mkdir /edbdata
+[root@localhost ~]# chown -R postgres:postgres /edbdata
+[root@localhost ~]#
+
+
+
+[postgres@localhost ~]$ which initdb
+/usr/pgsql-16/bin/initdb
+[postgres@localhost ~]$
+[postgres@localhost ~]$
+[postgres@localhost ~]$
+[postgres@localhost ~]$ pwd
+/home/postgres
+[postgres@localhost ~]$
+[postgres@localhost ~]$ initdb -D /edbdata -W
+
+The files belonging to this database system will be owned by user "postgres".
+This user must also own the server process.
+
+The database cluster will be initialized with locale "en_CA.UTF-8".
+The default database encoding has accordingly been set to "UTF8".
+The default text search configuration will be set to "english".
+
+Data page checksums are disabled.
+
+Enter new superuser password:
+Enter it again:
+
+fixing permissions on existing directory /edbdata ... ok
+creating subdirectories ... ok
+selecting dynamic shared memory implementation ... posix
+selecting default max_connections ... 100
+selecting default shared_buffers ... 128MB
+selecting default time zone ... America/New_York
+creating configuration files ... ok
+running bootstrap script ... ok
+performing post-bootstrap initialization ... ok
+syncing data to disk ... ok
+
+initdb: warning: enabling "trust" authentication for local connections
+initdb: hint: You can change this by editing pg_hba.conf or using the option -A,                                                                                                                                                              or --auth-local and --auth-host, the next time you run initdb.
+
+Success. You can now start the database server using:
+
+    pg_ctl -D /edbdata -l logfile start
+
+[postgres@localhost ~]$
+
+
+[postgres@localhost ~]$ vi /edbdata/postgresql.conf
+
+===> change port = 5433
+
+[postgres@localhost ~]$ pg_ctl -D /edbdata start
+waiting for server to start....2026-07-15 21:21:17.953 EDT [2907] LOG:  redirecting log output to logging collector process
+2026-07-15 21:21:17.953 EDT [2907] HINT:  Future log output will appear in directory "log".
+ done
+server started
+
+
+Reload the cluster.
+Type the following command:
+pg_ctl -D /edbdata reload
+or connect using psql –p 5433 postgres postgres and
+type the following command:
+SELECT pg_reload_conf();
+
+[postgres@localhost ~]$ which pg_ctl
+/usr/pgsql-16/bin/pg_ctl
+[postgres@localhost ~]$
+[postgres@localhost ~]$ pg_ctl -D /edbdata reload
+server signaled
+[postgres@localhost ~]$
+
+
+10. Stop the cluster.
+Type the following command:
+pg_ctl -D /edbdata –mf stop
+
+[postgres@localhost ~]$ pg_ctl -D /edbdata start
+waiting for server to start....2026-07-15 21:23:27.593 EDT [2944] LOG:  redirecting log output to logging collector process
+2026-07-15 21:23:27.593 EDT [2944] HINT:  Future log output will appear in directory "log".
+ done
+server started
+[postgres@localhost ~]$ ps -ef | grep post
+postgres    1003       1  0 21:14 ?        00:00:00 /usr/pgsql-16/bin/postgres -D /var/lib/pgsql/16/data/
+postgres    1131    1003  0 21:14 ?        00:00:00 postgres: logger
+postgres    1137    1003  0 21:14 ?        00:00:00 postgres: checkpointer
+postgres    1138    1003  0 21:14 ?        00:00:00 postgres: background writer
+postgres    1266    1003  0 21:14 ?        00:00:00 postgres: walwriter
+postgres    1267    1003  0 21:14 ?        00:00:00 postgres: autovacuum launcher
+postgres    1268    1003  0 21:14 ?        00:00:00 postgres: logical replication launcher
+root        2693    2188  0 21:16 pts/0    00:00:00 su - postgres
+postgres    2696    2693  0 21:16 pts/0    00:00:00 -bash
+postgres    2944       1  1 21:23 ?        00:00:00 /usr/pgsql-16/bin/postgres -D /edbdata
+postgres    2945    2944  0 21:23 ?        00:00:00 postgres: logger
+postgres    2946    2944  0 21:23 ?        00:00:00 postgres: checkpointer
+postgres    2947    2944  0 21:23 ?        00:00:00 postgres: background writer
+postgres    2949    2944  0 21:23 ?        00:00:00 postgres: walwriter
+postgres    2950    2944  0 21:23 ?        00:00:00 postgres: autovacuum launcher
+postgres    2951    2944  0 21:23 ?        00:00:00 postgres: logical replication launcher
+postgres    2952    2696  0 21:23 pts/0    00:00:00 ps -ef
+postgres    2953    2696  0 21:23 pts/0    00:00:00 grep --color=auto post
+
+Shutdown pg instance in fast mode
+
+[postgres@localhost ~]$ pg_ctl -D /edbdata -m fast stop
+waiting for server to shut down.... done
+server stopped
+[postgres@localhost ~]$
+
+[postgres@localhost ~]$ ps -ef | grep post
+postgres    1003       1  0 21:14 ?        00:00:00 /usr/pgsql-16/bin/postgres -D /var/lib/pgsql/16/data/
+postgres    1131    1003  0 21:14 ?        00:00:00 postgres: logger
+postgres    1137    1003  0 21:14 ?        00:00:00 postgres: checkpointer
+postgres    1138    1003  0 21:14 ?        00:00:00 postgres: background writer
+postgres    1266    1003  0 21:14 ?        00:00:00 postgres: walwriter
+postgres    1267    1003  0 21:14 ?        00:00:00 postgres: autovacuum launcher
+postgres    1268    1003  0 21:14 ?        00:00:00 postgres: logical replication launcher
+root        2693    2188  0 21:16 pts/0    00:00:00 su - postgres
+postgres    2696    2693  0 21:16 pts/0    00:00:00 -bash
+postgres    2940    2696 50 21:23 pts/0    00:00:00 ps -ef
+postgres    2941    2696  0 21:23 pts/0    00:00:00 grep --color=auto post
+
+
+
+
+
+
+                 DATABASE SHUTDOWN COMPARISON
+                 PostgreSQL vs Oracle
+================================================================
+
+
+                 PostgreSQL                         Oracle
+                 ----------                         ------
+
+
+        +-------------------+              +-------------------+
+        |   Smart Shutdown  |              | Shutdown Normal   |
+        |                   |              |                   |
+        | pg_ctl stop       |              | shutdown normal;   |
+        | -m smart          |              |                   |
+        +-------------------+              +-------------------+
+
+                 |                                  |
+                 |                                  |
+                 v                                  v
+
+
+        Wait all users exit                Wait all users exit
+        Wait transaction finish             Wait transaction finish
+
+
+                 |                                  |
+                 v                                  v
+
+
+        +-------------------+              +-------------------+
+        | Clean Shutdown    |              | Clean Shutdown    |
+        +-------------------+              +-------------------+
+
+
+
+
+
+================================================================
+
+
+        +-------------------+              +-------------------+
+        | FAST Shutdown     |              | Shutdown Immediate|
+        |                   |              |                   |
+        | pg_ctl stop       |              | shutdown immediate;|
+        | -m fast           |              |                   |
+        +-------------------+              +-------------------+
+
+                 |                                  |
+                 |                                  |
+                 v                                  v
+
+
+        Send SIGTERM                     Disconnect users
+        to sessions                      Rollback active TX
+
+
+                 |                                  |
+                 v                                  v
+
+
+        Kill Client Sessions             Flush datafile
+        Rollback TX                      Close database
+
+
+                 |                                  |
+                 v                                  v
+
+
+        Checkpoint                       Database Closed
+        Flush WAL
+        Clean shutdown
+
+
+
+        ===================              ===================
+             NO RECOVERY                       NO RECOVERY
+        ===================              ===================
+
+
+
+
+
+================================================================
+
+
+        +-------------------+              +-------------------+
+        | Immediate         |              | Shutdown Abort    |
+        | Shutdown          |              |                   |
+        |                   |              | shutdown abort;   |
+        | pg_ctl stop       |              |                   |
+        | -m immediate      |              |                   |
+        +-------------------+              +-------------------+
+
+                 |                                  |
+                 |                                  |
+                 v                                  v
+
+
+        Kill PostgreSQL                 Kill Oracle PMON
+        Process                         SMON process
+
+
+                 |                                  |
+                 v                                  v
+
+
+        No cleanup                      No checkpoint
+        No WAL flush                    No datafile sync
+
+
+                 |                                  |
+                 v                                  v
+
+
+        Next startup                    Next startup
+
+                 |                                  |
+                 v                                  v
+
+
+        WAL Crash Recovery              Instance Recovery
+
+                 |                                  |
+                 v                                  v
+
+
+        REDO WAL                        REDO Online Redo Log
